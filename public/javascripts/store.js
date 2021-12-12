@@ -300,20 +300,23 @@ function createButtonsRight(item, index, arr){
 }
 
 
-    socket.on('connected', data => {
-        console.log(data);
-        const p = new Player(inputMap, scene, counter, leftSideWalls, rightSideWalls, storeWallBack, storeWallLeft, storeWallRight, storeWallFront);
+const p = new Player(inputMap, camera, scene, counter, leftSideWalls, rightSideWalls, storeWallBack, storeWallLeft, storeWallRight, storeWallFront);
         
-    });
 
-    socket.on('handshake1', function (data) {
-        if (player2) {
-            player2.dispose();
-        }
-        const p = new Player(inputMap, scene, counter, leftSideWalls, rightSideWalls, storeWallBack, storeWallLeft, storeWallRight, storeWallFront);
+    // socket.on('connected', data => {
+    //     console.log(data);
+    //     const p = new Player(inputMap, scene, counter, leftSideWalls, rightSideWalls, storeWallBack, storeWallLeft, storeWallRight, storeWallFront);
         
-        socket.emit('handshake2', 'player created');
-    });
+    // });
+
+    // socket.on('handshake1', function (data) {
+    //     if (player2) {
+    //         player2.dispose();
+    //     }
+    //     const p = new Player(inputMap, scene, counter, leftSideWalls, rightSideWalls, storeWallBack, storeWallLeft, storeWallRight, storeWallFront);
+        
+    //     socket.emit('handshake2', 'player created');
+    // });
 
 
     return scene;

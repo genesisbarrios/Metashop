@@ -1,14 +1,6 @@
 class Player {
-    constructor(inputMap, scene, counter, leftSideWalls, rightSideWalls, storeWallBack, storeWallLeft, storeWallRight, storeWallFront) {
+    constructor(inputMap, camera, scene, counter, leftSideWalls, rightSideWalls, storeWallBack, storeWallLeft, storeWallRight, storeWallFront) {
         this.character = BABYLON.SceneLoader.ImportMeshAsync("", "../models/casual_man/", "scene.gltf", scene).then((result) => {
-            
-            var camera = new BABYLON.ArcRotateCamera(
-                'camera', -Math.PI / 2,
-                Math.PI / 2.5,
-                115,
-                new BABYLON.Vector3(0, -20, 45),
-                scene
-            );
 
             var characterMesh = result.meshes[0];
             characterMesh.rotationQuaternion = null;

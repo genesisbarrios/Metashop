@@ -9,13 +9,15 @@
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
     <link href="/stylesheets/bootstrap-4.0.0-dist/css/bootstrap.min.css" type="text/css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.js"></script>
     <script src="https://cdn.babylonjs.com/babylon.js"></script>
     <script src="https://cdn.babylonjs.com/gui/babylon.gui.min.js"></script>
     <script src="https://cdn.babylonjs.com/proceduralTexturesLibrary/babylonjs.proceduralTextures.min.js"></script>
     <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
     <link rel="icon" href="/images/logo.ico" type="image/x-icon">
     <script src="https://code.jquery.com/pep/0.4.3/pep.js"></script>
-    <script src="https://cdn.socket.io/4.4.0/socket.io.min.js" integrity="sha384-1fOn6VtTq3PWwfsOrk45LnYcGosJwzMHv+Xh/Jx5303FVOXzEnw0EpLv30mtjmlj" crossorigin="anonymous"></script>
+    <!--<script src="https://cdn.socket.io/4.4.0/socket.io.min.js" integrity="sha384-1fOn6VtTq3PWwfsOrk45LnYcGosJwzMHv+Xh/Jx5303FVOXzEnw0EpLv30mtjmlj" crossorigin="anonymous"></script>-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.js"></script>
     <style>
         html,
         body {
@@ -38,7 +40,35 @@
 
 <body>
     <canvas id="renderCanvas" touch-action="none"></canvas>
-    <!--<script src="https://github.com/Cognigy/WebchatWidget/releases/download/v2.20.0/webchat.js"></script>-->
+    <div class="container" id="livechat">
+        <h5>Spaces Webchat</h5>
+        <div class="row">
+           <div class="col-8">
+              <label for="username">Username:</label>
+              <textarea class="form-control" id="username" rows="1"></textarea>
+           </div>
+           <div class="col-4">
+              <br>
+              <button id="connect" class="btn btn-primary" onclick="startConnect()">Connect</button>
+           </div>
+           <br>
+        </div>
+        <div class="row">
+           <div class="col-12">
+              <div class="form-group">
+                 <label for="exampleFormControlTextarea1">Message:</label>
+                 <textarea class="form-control" id="message" rows="1"></textarea>
+              </div>
+              <button id="sendMsg" class="btn btn-success" onclick="sendMsg()">Send</button>
+           </div>
+        </div>
+        <hr/>
+        <div class="row">
+           <div class="col-12">
+              <textarea readonly="readonly" class="form-control" id="console-log" rows="3"></textarea>
+           </div>
+        </div>
+     </div>
 
     <script src="https://github.com/Cognigy/WebchatWidget/releases/latest/download/webchat.js"></script>
     <!-- Load Webchat Plugins via a script tag -->
@@ -54,7 +84,319 @@
 
     </script>
     <script>
-        var socket = io();
+        //var socket = io();
+
+        var avayaSocketURL = "https://spacesapis-socket.avayacloud.com/chat";
+        $(document).ready(init);
+         
+        function init() {
+            $('#message').prop("readonly", true);
+            $('#sendMsg').prop("disabled", true);
+            document.getElementById("connect").innerHTML = "Connect";
+        }
+        
+        var spacesToken = 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkX3NpZyI6IlZveFhfbkN5cHZlb3pYTDcxWHNHeE9pLTc1ck5RYWRpZFlXUW85WFNIQjQiLCJwcm9kdWN0X3R5cGUiOiJhY2NvdW50cyIsImxhc3R1cGRhdGV0aW1lIjoiMjAyMS0xMi0xMlQxMDoxMTo1MC4zNTgiLCJpc3MiOiJlc25hLmNvbSIsInB1YmxpY2tleWlkIjoiYWc5emZtOXVaWE51WVhOMFlXZHBibWR5R2dzU0RVZEtkM1JRZFdKc2FXTkxaWGtZZ0lDQTE1WEpsd29NIiwiZXhwIjoxNjQxODk1OTEwLCJ1c2VyX2lkIjoiYWc5emZtOXVaWE51WVhOMFlXZHBibWR5RVFzU0JGVnpaWElZZ0lDQWw3LWZod29NIiwidmVyIjoiMi4wIn0.fJgw49vI3StF0pGC7NM4ePZCQh6rABqrhNEV5pqqEGh2RUSOlMGfs-9I8UohtXtE6H1Bocxko-dCnMVgoUQyUCALuoATon4f_cMLYYidhWdwNfBWqlZbAEUh6ZCDIVBzYU1dJ92RUEZZ9cd45SnE-jN3DZPRqY1pzkUDXBuH8dh3JU-9e4rW5l43RFmiiEVnRuR3a0fwrqACgJwp9eoLb6kftywNnOXu5qREcqUNajO5IUT_SgZxiGa5eUaHuNM3pzADtC1PnmqBEQ95OlO2-K7I-tIzO711idj_NdOofnzi4xKhFWNw459Wsb6XZ8hfpJwqoIInP38kKVH6k6_C3w';
+        var socketURL = "https://spacesapis-socket.avayacloud.com/chat";
+        var spacesID = '61b62ad92509f45b19455916';
+        var socketAvaya = "";
+        var password = "132435";
+
+        function connectSocket() {
+            console.log('connectSocket');
+            socketAvaya = io.connect(
+                socketURL, {
+                    query: 'tokenType=jwt&token=' + spacesToken,
+                    transports: ['websocket']
+                }
+            );
+            socketAvaya.on('connect', function () {
+                var spaceToSubscribe = {
+                    channel: {
+                        _id: spacesID,
+                        type: 'topic'
+                    }
+                };
+                socketAvaya.emit('SUBSCRIBE_CHANNEL', spaceToSubscribe);
+                document.getElementById("connect").innerHTML = "Disconnect";
+            });
+        
+            socketAvaya.on('disconnect', function () {
+                console.log("Socket disconnect");
+            });
+        
+            socketAvaya.on('connect_error', function (e) {
+                console.log("Socket connect_error");
+                console.log(e)
+            });
+        
+            socketAvaya.on('error', function (e) {
+                console.log(e)
+                console.log("Socket error");
+            });
+        
+            socketAvaya.on('CHANNEL_SUBSCRIBED', function () {
+                console.log('channel subscribed')
+                $('#chatMsg').prop("disabled", false);
+                $('#sendMsg').prop("disabled", false);
+                $('#message').prop("readonly", false);
+                //populateChats();
+                populateIdeas();
+                populateTasks();
+                startListening();
+            });
+        
+            socketAvaya.on('CHANNEL_UNSUBSCRIBED', function () {
+                console.log("CHANNEL_UNSUBSCRIBED");
+            });
+        
+            socketAvaya.on('SUBSCRIBE_CHANNEL_FAILED', function () {
+                console.log("SUBSCRIBE_CHANNEL_FAILED");
+            });
+        
+            socketAvaya.on('SEND_MESSAGE_FAILED', function (msg) {
+                console.log("SEND_MESSAGE_FAILED");
+            });
+        
+            socketAvaya.on('MESSAGE_SENT', function (msg) {
+                console.log('message sent callback')
+                var category = msg.category;
+                var message;
+                var description;
+                var strLength;
+                if (category == "chat") {
+                    message = msg.content.bodyText;
+                    if (msg.content.data !== undefined) {
+                        if (msg.content.data.length > 0) {
+                            message = msg.sender.displayname + ": " + msg.content.data[0].name + " " + msg.content.data[0].path;
+                        }
+                    }
+                    // Chat messages from Spaces come in the form <p>message goes here<p>
+                    if (message.includes("<p>")) {
+                        strLength = msg.content.bodyText.length;
+                        // Decode ' and " characters
+                        message = msg.sender.displayname + ": " + message.substring(3, strLength - 4).replace(new RegExp("&" + "#" + "x27;", "g"), "'").replace(/&quot;/g, '"');
+                    } else {
+                        message = msg.sender.displayname + ": " + message.replace(new RegExp("&" + "#" + "x27;", "g"), "'").replace(/&quot;/g, '"');
+                    }
+                    console.log(message);
+                    trace(message);
+                } else if (category == "task") {
+                    message = msg.content.bodyText;
+                    description = msg.content.description;
+                    if (description.includes("<p>")) {
+                        strLength = msg.content.description.length;
+                        // Decode ' and " characters
+                        message = "Task: " + message + " / " + description.substring(3, strLength - 4).replace(new RegExp("&" + "#" + "x27;", "g"), "'").replace(/&quot;/g, '"');
+                    } else {
+                        message = "Task: " + message + " / " + description.replace(new RegExp("&" + "#" + "x27;", "g"), "'").replace(/&quot;/g, '"');
+                    }
+                    trace(message);
+                } else if (category == "idea") {
+                    message = msg.content.bodyText;
+                    if (msg.content.data.length !== 0) {
+                        path = msg.content.data[0].path;
+                        message = "Post: " + message + " / " + path;
+                        trace(message);
+                    }
+                }
+            });
+        }
+        
+
+        function populateChats() {
+            $.ajax({
+                headers: {
+                    'Authorization': 'jwt ' + spacesToken,
+                    'Accept': 'application/json'
+                },
+                url: 'https://spacesapis.avayacloud.com/api/spaces/' + spacesID + '/messages/query?category=chat&size=50',
+                type: "GET",
+                dataType: "json",
+                success: function (data) {
+                    console.dir(data);
+                    var entries = data.total;
+                    var msg;
+                    var message;
+                    var strLength;
+                    for (i = entries - 1; i >= 0; i--) {
+                        msg = data.data[i];
+                        message = msg.content.bodyText;
+                        if (msg.content.data.length > 0) {
+                            message = msg.sender.displayname + ": " + msg.content.data[0].name + " " + msg.content.data[0].path;
+                        } else if (message.includes("<p>")) {
+                            // Chat messages from Spaces come in the form <p>message goes here<p>
+                            strLength = msg.content.bodyText.length;
+                            // Decode ' and " characters
+                            message = msg.sender.displayname + ": " + msg.content.bodyText.substring(3, strLength - 4).replace(new RegExp("&" + "#" + "x27;", "g"), "'").replace(/&quot;/g, '"');
+                        } else {
+                            message = msg.sender.displayname + ": " + message.replace(new RegExp("&" + "#" + "x27;", "g"), "'").replace(/&quot;/g, '"');
+                        }
+                        console.log(message);
+                        trace("msg: " + message);
+                    }
+                },
+                error: function (error) {
+                    console.log(`Error ${error}`);
+                    console.log("error");
+                }
+            });
+        }
+
+        function populateTasks() {
+            $.ajax({
+                headers: {
+                    'Authorization': 'jwt ' + spacesToken,
+                    'Accept': 'application/json',
+                    'spaces-x-space-password': password
+                },
+                url: 'https://spacesapis.avayacloud.com/api/spaces/' + spacesID + '/messages/query?category=task&size=50',
+                type: "GET",
+                dataType: "json",
+                success: function (data) {
+                    var entries = data.total;
+                    for (i = entries - 1; i >= 0; i--) {
+                        msg = data.data[i];
+                        var message = msg.content.bodyText;
+                        var description = msg.content.description;
+                        if (description.includes("<p>")) {
+                            strLength = msg.content.description.length;
+                            // Decode ' and " characters
+                            message = "Task: " + message + " / " + description.substring(3, strLength - 4).replace(new RegExp("&" + "#" + "x27;", "g"), "'").replace(/&quot;/g, '"');
+                        } else {
+                            message = "Task: " + message + " / " + description.replace(new RegExp("&" + "#" + "x27;", "g"), "'").replace(/&quot;/g, '"');
+                        }
+                        trace(message);
+                    }
+                },
+                error: function (error) {
+                    console.log(`Error ${error}`);
+                }
+            });
+        }
+        
+        function populateIdeas() {
+            $.ajax({
+                headers: {
+                    'Authorization': 'jwt ' + spacesToken,
+                    'Accept': 'application/json',
+                    'spaces-x-space-password': password
+                },
+                url: 'https://spacesapis.avayacloud.com/api/spaces/' + spacesID + '/messages/query?category=idea&size=50',
+                type: "GET",
+                dataType: "json",
+                success: function (data) {
+                    var entries = data.total;
+                    for (i = entries - 1; i >= 0; i--) {
+                        msg = data.data[i];
+                        var message = msg.content.bodyText;
+                        var path = msg.content.data[0].path;
+                        message = "Post: " + message + " / " + path;
+                        trace(message);
+                    }
+                },
+                error: function (error) {
+                    console.log(`Error ${error}`);
+                }
+            });
+        }
+
+        function sendMsg() {
+            var message = {
+                content: {
+                    bodyText: $('#message').val()
+                },
+                sender: {
+                    type: 'user'
+                },
+                category: 'chat',
+                topicId: spacesID
+            };
+        
+            socketAvaya.emit('SEND_MESSAGE', message);
+            document.getElementById('message').value = "";
+        }
+        
+        function clearTrace() {
+            var consoleTxt = $('#console-log').val();
+            $('#console-log').val("");
+        }
+        
+        function disconnect() {
+            var spaceToUnsubscribe = {
+                channel: {
+                    _id: spacesID,
+                    type: 'topic'
+                }
+            };
+            socketAvaya.emit('UNSUBSCRIBE_CHANNEL', spaceToUnsubscribe);
+            init();
+            clearTrace();
+            socketAvaya = null;
+        }
+        
+        function startListening(){
+            setInterval("populateChats()", 1000);
+        }
+
+        function startConnect() {
+            if (document.getElementById("connect").innerHTML == "Disconnect") {
+                disconnect();
+                return;
+            }
+            input = document.getElementById("username").value;
+            if (input.trim() != '') {
+                username = document.getElementById("username").value;
+            } else {
+                username = "anonymous";
+            }
+            console.log(username)
+
+            // Create an anonymous user in order to obtain a jwt token
+            $.ajax({
+                data: JSON.stringify({
+                    "displayname": username,
+                    "username": username
+                }),
+                url: "https://spacesapis.avayacloud.com/api/anonymous/auth",
+                contentType: 'application/json',
+                type: 'POST',
+                success: function (data) {
+                    spacesToken = data.token;
+                    console.log('got token: ' + spacesToken);
+                    joinRoom();
+                    connectSocket();
+                },
+                error: function (error) {}
+            });
+        }
+        
+        function joinRoom() {
+            // Join the space
+            $.ajax({
+                headers: {
+                    'Authorization': 'jwt ' + spacesToken,
+                    'Accept': 'application/json'
+                },
+                url: 'https://spacesapis.avayacloud.com/api/spaces/' + spacesID + '/join',
+                type: "GET",
+                success: function (data) {
+                    console.log("Room joined");
+                    console.dir(data);
+                }
+            });
+        }
+        
+        function trace(text) {
+            text = text.trim();
+            const now = (window.performance.now() / 1000).toFixed(3);
+            var consoleTxt = $('#console-log').val();
+            console.log(consoleTxt)
+            console.log(text)
+            var log = text;
+            //$('#console-log').val(consoleTxt + "\n\n" + log);
+            document.getElementById("console-log").innerHTML = consoleTxt + "\n\n" + log;
+        }
+
       </script>
     <script src="/javascripts/Player.js"></script>
     <script src="/javascripts/store.js"></script>

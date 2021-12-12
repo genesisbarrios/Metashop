@@ -169,3 +169,12 @@ p{
 .onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-switch {
     right: 0px; 
 }
+
+#livechat{
+    width:30%;
+    height:50%;
+    z-index:1;
+    position:absolute;
+    left:0;
+    bottom:50px;
+}
