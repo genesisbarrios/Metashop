@@ -1,4 +1,2 @@
-Wavy Pads: A web based music pad built with Tone.js.
-
-tonejs.github.io
+MetaShop: A 3D interactive retail store built with Babylon.js, and Node.js.
 
