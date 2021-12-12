@@ -9,6 +9,10 @@ var usersRouter = require('./routes/users');
 var storesRouter = require('./routes/store');
 
 var app = express();
+const http = require('http');
+const server = http.createServer(app);
+const { Server } = require("socket.io");
+const io = new Server(server);
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -41,8 +45,27 @@ app.use(function(err, req, res, next) {
     res.render('error');
 });
 
-app.listen(3000, () => {
-    console.log(`Listening at http://localhost:3000`)
-})
+var usersConnected = {}; 
+
+io.on('connection', (socket) => {
+    console.log('a user connected');
+    socket.emit('connected', socket.id + ' connected');
+    usersConnected[socket.id] = socket.id;
+
+    socket.on('send-update', function (data) {
+        socket.broadcast.to(usersConnected[socket.id]).emit('receiveUpdate', data);
+    });
+
+    socket.on('disconnect', () => {
+        console.log('user disconnected');
+        delete usersConnected[socket.id];
+        socket.emit('user-disconnected', usersConnected);
+      });
+
+});
+  
+server.listen(3000);
+
+
 
 module.exports = app;

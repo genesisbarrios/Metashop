@@ -15,7 +15,7 @@
     <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
     <link rel="icon" href="/images/logo.ico" type="image/x-icon">
     <script src="https://code.jquery.com/pep/0.4.3/pep.js"></script>
-
+    <script src="https://cdn.socket.io/4.4.0/socket.io.min.js" integrity="sha384-1fOn6VtTq3PWwfsOrk45LnYcGosJwzMHv+Xh/Jx5303FVOXzEnw0EpLv30mtjmlj" crossorigin="anonymous"></script>
     <style>
         html,
         body {
@@ -38,6 +38,24 @@
 
 <body>
     <canvas id="renderCanvas" touch-action="none"></canvas>
+    <!--<script src="https://github.com/Cognigy/WebchatWidget/releases/download/v2.20.0/webchat.js"></script>-->
+
+    <script src="https://github.com/Cognigy/WebchatWidget/releases/latest/download/webchat.js"></script>
+    <!-- Load Webchat Plugins via a script tag -->
+    <script src="https://github.com/Cognigy/WebchatWidget/releases/download/v2.20.0/speech-output.webchat-plugin.js"></script>
+
+    
+    <script>
+        function startChat(){
+            initWebchat(
+                "https://use1-sta.endpoint.aiflow.avayacloud.com/e38919734260cb2a09da5cfb7abd56a6628525fa3b6d3b56d46b0ae5fd7e849d"
+            );
+        }
+
+    </script>
+    <script>
+        var socket = io();
+      </script>
     <script src="/javascripts/Player.js"></script>
     <script src="/javascripts/store.js"></script>
 </body>
